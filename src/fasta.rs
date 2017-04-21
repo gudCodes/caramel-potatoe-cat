@@ -18,7 +18,7 @@ pub enum NucleicAcidCode {
     D, // G/A/T
     H, // A/C/T
     V, // G/C/A
-    -, // gap of indeterminate length
+    Gap, // gap of indeterminate length
 }
 
 #[derive(Debug,PartialEq,Eq)]
@@ -47,8 +47,8 @@ pub enum AminoAcidCode {
     X, // any
     M, // methionine
     N, // asparagine
-    *, // translation stop
-    -, // gap of indeterminate length
+    Stop, // translation stop
+    Gap, // gap of indeterminate length
 }
 
 named!(description, preceded!(char!('>'), not_line_ending));
