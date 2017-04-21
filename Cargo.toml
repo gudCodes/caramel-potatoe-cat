@@ -1,0 +1,8 @@
+[package]
+name = "caramel-potatoe-cat"
+version = "0.1.0"
+authors = [
+    "Mark W. Murphy <murphy.mark.w+github@gmail.com>",
+]
+
+[dependencies]
