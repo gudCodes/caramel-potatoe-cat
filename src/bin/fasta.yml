@@ -2,15 +2,15 @@ name: fasta
 version: "2017.0.0"
 about: FASTA Manipulator
 args:
-    - debug:
-        short: d
-        long: debug
-        help: enable debug logging
-    - verbose:
-        short: v
-        long: verbose
-        multiple: true
-        help: set the verbosity level of logging
+  - debug:
+      short: d
+      long: debug
+      help: enable debug logging
+  - verbose:
+      short: v
+      long: verbose
+      multiple: true
+      help: set the verbosity level of logging
 subcommands:
   - verify:
       about: verify FASTA format
