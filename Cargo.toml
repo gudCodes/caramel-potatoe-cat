@@ -5,4 +5,6 @@ authors = [
     "Mark W. Murphy <murphy.mark.w+github@gmail.com>",
 ]
 
-[dependencies]
+[dependencies.clap]
+version = ">2.23.0"
+features = ["yaml", "color"]
