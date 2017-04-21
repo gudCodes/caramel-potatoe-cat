@@ -5,6 +5,8 @@ extern crate env_logger;
 #[macro_use]
 extern crate clap;
 
+extern crate caramel_potatoe_cat;
+
 use std::process;
 
 
