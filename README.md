@@ -13,7 +13,9 @@ Maybe some inspiration from [fast CSV parsing in rust](https://github.com/BurntS
 
 Most existing FASTQ manipulation implementations are based on [htslib](https://github.com/samtools/htslib).
 
-FASTQ files are simple text files with a four line record corresponding to a sequence, [details](https://en.wikipedia.org/wiki/FASTQ_format). [1000 genomes](http://www.internationalgenome.org/) is a good place for example data. One sample with multiple different FASTQ file sizes [NA12878](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/NA12878/sequence_read/).
+FASTQ files are simple text files with a four line record corresponding to a sequence, [details on wikipedia](https://en.wikipedia.org/wiki/FASTQ_format). 
+
+[1000 genomes](http://www.internationalgenome.org/) is a good place for example data. One sample (NA12878) with multiple different FASTQ file sizes: ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/NA12878/sequence_read/.
 
 Typically FASTQs gzipped and read in as pairs of files.
 So `<name>_1.fastq.gz` and `<name>_2.fastq.gz` should have the same number of rows with each entry corresponding in order to a pair of reads.
