@@ -12,8 +12,8 @@ args:
       multiple: true
       help: set the verbosity level of logging
 subcommands:
-  - verify:
-      about: verify FASTA format
+  - validate:
+      about: validate FASTA format
       version: "0.0"
       args:
         - path:
