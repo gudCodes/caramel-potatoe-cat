@@ -1,8 +1,7 @@
-use std::str::from_utf8;
-
 use nom::not_line_ending;
 
-#[derive(Debug,PartialEq,Eq)]
+
+#[derive(Debug,PartialEq,Eq,Clone)]
 pub enum NucleicAcidCode {
     A, // adenosine
     C, // cytidine
@@ -23,7 +22,7 @@ pub enum NucleicAcidCode {
     Gap, // gap of indeterminate length
 }
 
-#[derive(Debug,PartialEq,Eq)]
+#[derive(Debug,PartialEq,Eq,Clone)]
 pub enum AminoAcidCode {
     A, // alanine
     P, // proline
@@ -53,43 +52,48 @@ pub enum AminoAcidCode {
     Gap, // gap of indeterminate length
 }
 
-fn str_to_nucleic_acid_code(s: &str) -> Result<NucleicAcidCode, &str> {
-    match s.to_uppercase().as_ref() {
-        "A" => Ok(NucleicAcidCode::A), // adenosine
-        "C" => Ok(NucleicAcidCode::C), // cytidine
-        "G" => Ok(NucleicAcidCode::G), // guanine
-        "T" => Ok(NucleicAcidCode::T), // thymidine
-        "N" => Ok(NucleicAcidCode::N), // A/G/C/T (any)
-        "U" => Ok(NucleicAcidCode::U), // uridine
-        "K" => Ok(NucleicAcidCode::K), // G/T (keto)
-        "S" => Ok(NucleicAcidCode::S), // G/C (strong)
-        "Y" => Ok(NucleicAcidCode::Y), // T/C (pyrimidine)
-        "M" => Ok(NucleicAcidCode::M), // A/C (amino)
-        "W" => Ok(NucleicAcidCode::W), // A/T (weak)
-        "R" => Ok(NucleicAcidCode::R), // G/A (purine)
-        "B" => Ok(NucleicAcidCode::B), // G/T/C
-        "D" => Ok(NucleicAcidCode::D), // G/A/T
-        "H" => Ok(NucleicAcidCode::H), // A/C/T
-        "V" => Ok(NucleicAcidCode::V), // G/C/A
-        "-" => Ok(NucleicAcidCode::Gap), // gap of indeterminate length
-        _ => Err("unknown nucleic acid code '{}'"),
+type NucleicAcidSequence = Vec<NucleicAcidCode>;
+
+fn from_u8(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
+    let len = ns.len();
+
+    let mut res: NucleicAcidSequence = NucleicAcidSequence::new();
+
+    res.resize(len, NucleicAcidCode::Gap);
+
+    for i in 0..len {
+        let mut arr = res.as_mut_slice();
+        match ns[i] {
+            65 => { arr[i] = NucleicAcidCode::A },
+            67 => { arr[i] = NucleicAcidCode::C },
+            71 => { arr[i] = NucleicAcidCode::G },
+            84 => { arr[i] = NucleicAcidCode::T },
+            85 => { arr[i] = NucleicAcidCode::U },
+            78 => { arr[i] = NucleicAcidCode::N },
+            75 => { arr[i] = NucleicAcidCode::K },
+            83 => { arr[i] = NucleicAcidCode::S },
+            89 => { arr[i] = NucleicAcidCode::Y },
+            77 => { arr[i] = NucleicAcidCode::M },
+            87 => { arr[i] = NucleicAcidCode::W },
+            82 => { arr[i] = NucleicAcidCode::R },
+            66 => { arr[i] = NucleicAcidCode::B },
+            68 => { arr[i] = NucleicAcidCode::D },
+            72 => { arr[i] = NucleicAcidCode::H },
+            86 => { arr[i] = NucleicAcidCode::V },
+            45 => { arr[i] = NucleicAcidCode::Gap },
+            _ => return Err("invalid nucleic acid code"),
+        }
     }
+
+    Ok(res)
 }
 
 named!(description,
     preceded!(char!('>'), not_line_ending)
 );
 
-named!(nucleic_acid_str(&[u8]) -> &str,
-    map_res!(take!(1), from_utf8)
-);
-
-named!(nucleic_acid_code(&[u8]) -> NucleicAcidCode,
-    map_res!(nucleic_acid_str, str_to_nucleic_acid_code)
-);
-
-named!(nucleic_acid_sequence(&[u8]) -> Vec<NucleicAcidCode>,
-    many0!(nucleic_acid_code)
+named!(nucleic_acid_sequence(&[u8]) -> NucleicAcidSequence,
+    map_res!(not_line_ending, from_u8)
 );
 
 #[cfg(test)]
@@ -97,38 +101,20 @@ mod tests {
     extern crate test;
 
     use super::*;
-    use nom::IResult::Done;
 
     #[test]
-    fn test_description() {
-        let data = &b">ERR001275.1198"[..];
+    fn test_nucleic_acid_code_size() {
+        use std::mem::size_of;
 
-        let res = description(data);
-        assert_eq!(res, Done(&b""[..], &data[1..]));
+        assert_eq!(size_of::<NucleicAcidCode>(), 1);
     }
 
     #[test]
-    fn test_nucleic_acid_str() {
-        let data = &b"A"[..];
-
-        let res = nucleic_acid_str(data);
-        assert_eq!(res, Done(&b""[..], "A"));
-    }
-
-    #[test]
-    fn test_nucleic_acid_code() {
-        let data = &b"A"[..];
-
-        let res = nucleic_acid_code(data);
-        assert_eq!(res, Done(&b""[..], NucleicAcidCode::A));
-    }
-
-    #[test]
-    fn test_nucleic_acid_sequence() {
+    fn test_nucleic_acid_from_u8() {
         let data = &b"ACTG"[..];
+        let res = from_u8(data);
 
-        let res = nucleic_acid_sequence(data);
-        assert_eq!(res, Done(&b""[..], vec![
+        assert_eq!(res, Ok(vec![
             NucleicAcidCode::A,
             NucleicAcidCode::C,
             NucleicAcidCode::T,
@@ -136,8 +122,35 @@ mod tests {
         ]));
     }
 
+    #[test]
+    fn test_parse_description() {
+        use nom::IResult::Done;
+
+        let data = &b">ERR001275.1198"[..];
+        let res = description(data);
+
+        assert_eq!(res, Done(&b""[..], &data[1..]));
+    }
+
+    #[test]
+    fn test_parse_nucleic_acid_sequence() {
+        use nom::IResult::Done;
+
+        let data = &b"ACTG"[..];
+        let res = nucleic_acid_sequence(data);
+
+        let expect = vec![
+            NucleicAcidCode::A,
+            NucleicAcidCode::C,
+            NucleicAcidCode::T,
+            NucleicAcidCode::G,
+        ];
+
+        assert_eq!(res, Done(&b""[..], expect));
+    }
+
     #[bench]
-    fn bench_description(b: &mut test::Bencher) {
+    fn bench_parse_description(b: &mut test::Bencher) {
         let data = include_bytes!("../data/bench_description.fa");
 
         b.bytes = data.len() as u64;
@@ -145,26 +158,18 @@ mod tests {
     }
 
     #[bench]
-    fn bench_nucleic_acid_str(b: &mut test::Bencher) {
-        let data = &b"A"[..];
+    fn bench_sequence_from_u8(b: &mut test::Bencher) {
+        let data = include_bytes!("../data/test.sequence");
 
-        b.bytes = 1;
-        b.iter(|| nucleic_acid_str(data));
+        b.bytes = data.len() as u64;
+        b.iter(|| from_u8(data));
     }
 
     #[bench]
-    fn bench_nucleic_acid_code(b: &mut test::Bencher) {
-        let data = &b"A"[..];
+    fn bench_parse_nucleic_acid_sequence(b: &mut test::Bencher) {
+        let data = include_bytes!("../data/test.sequence");
 
-        b.bytes = 1;
-        b.iter(|| nucleic_acid_code(data));
-    }
-
-    #[bench]
-    fn bench_nucleic_acid_sequence(b: &mut test::Bencher) {
-        let data = &b"ACTG"[..];
-
-        b.bytes = 4;
+        b.bytes = data.len() as u64;
         b.iter(|| nucleic_acid_sequence(data));
     }
 }
