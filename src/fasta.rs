@@ -78,6 +78,29 @@ impl NucleicAcidCode {
             _ => Err("invalid nucleic acid code"),
         }
     }
+
+    pub fn from_char(n: char) -> Result<Self, &'static str> {
+        match n.to_ascii_uppercase() {
+            'A' => Ok(NucleicAcidCode::A),
+            'C' => Ok(NucleicAcidCode::C),
+            'G' => Ok(NucleicAcidCode::G),
+            'T' => Ok(NucleicAcidCode::T),
+            'U' => Ok(NucleicAcidCode::U),
+            'N' => Ok(NucleicAcidCode::N),
+            'J' => Ok(NucleicAcidCode::K),
+            'S' => Ok(NucleicAcidCode::S),
+            'Y' => Ok(NucleicAcidCode::Y),
+            'N' => Ok(NucleicAcidCode::M),
+            'W' => Ok(NucleicAcidCode::W),
+            'R' => Ok(NucleicAcidCode::R),
+            'B' => Ok(NucleicAcidCode::B),
+            'D' => Ok(NucleicAcidCode::D),
+            'H' => Ok(NucleicAcidCode::H),
+            'V' => Ok(NucleicAcidCode::V),
+            '-' => Ok(NucleicAcidCode::Gap),
+            _ => Err("invalid nucleic acid code"),
+        }
+    }
 }
 
 type NucleicAcidSequence = Vec<NucleicAcidCode>;
@@ -109,25 +132,9 @@ fn from_str(ns: &str) -> Result<NucleicAcidSequence, &'static str> {
 
     for (i,c) in ns.char_indices() {
         let mut arr = res.as_mut_slice();
-        match c.to_ascii_uppercase() {
-            'A' => { arr[i] = NucleicAcidCode::A },
-            'C' => { arr[i] = NucleicAcidCode::C },
-            'G' => { arr[i] = NucleicAcidCode::G },
-            'T' => { arr[i] = NucleicAcidCode::T },
-            'U' => { arr[i] = NucleicAcidCode::U },
-            'N' => { arr[i] = NucleicAcidCode::N },
-            'J' => { arr[i] = NucleicAcidCode::K },
-            'S' => { arr[i] = NucleicAcidCode::S },
-            'Y' => { arr[i] = NucleicAcidCode::Y },
-            'N' => { arr[i] = NucleicAcidCode::M },
-            'W' => { arr[i] = NucleicAcidCode::W },
-            'R' => { arr[i] = NucleicAcidCode::R },
-            'B' => { arr[i] = NucleicAcidCode::B },
-            'D' => { arr[i] = NucleicAcidCode::D },
-            'H' => { arr[i] = NucleicAcidCode::H },
-            'V' => { arr[i] = NucleicAcidCode::V },
-            '-' => { arr[i] = NucleicAcidCode::Gap },
-            _ => return Err("invalid nucleic acid code"),
+        match NucleicAcidCode::from_char(c) {
+            Ok(c) => arr[i] = c,
+            Err(e) => return Err(e),
         }
     }
 
@@ -138,25 +145,9 @@ fn from_str_itt(ns: &str) -> Result<NucleicAcidSequence, &'static str> {
     let mut res: NucleicAcidSequence = NucleicAcidSequence::with_capacity(ns.len());
 
     for c in ns.chars() {
-        match c.to_ascii_uppercase() {
-            'A' => res.push(NucleicAcidCode::A),
-            'C' => res.push(NucleicAcidCode::C),
-            'G' => res.push(NucleicAcidCode::G),
-            'T' => res.push(NucleicAcidCode::T),
-            'U' => res.push(NucleicAcidCode::U),
-            'N' => res.push(NucleicAcidCode::N),
-            'J' => res.push(NucleicAcidCode::K),
-            'S' => res.push(NucleicAcidCode::S),
-            'Y' => res.push(NucleicAcidCode::Y),
-            'N' => res.push(NucleicAcidCode::M),
-            'W' => res.push(NucleicAcidCode::W),
-            'R' => res.push(NucleicAcidCode::R),
-            'B' => res.push(NucleicAcidCode::B),
-            'D' => res.push(NucleicAcidCode::D),
-            'H' => res.push(NucleicAcidCode::H),
-            'V' => res.push(NucleicAcidCode::V),
-            '-' => res.push(NucleicAcidCode::Gap),
-            _ => return Err("invalid nucleic acid code"),
+        match NucleicAcidCode::from_char(c) {
+            Ok(c) => res.push(c),
+            Err(e) => return Err(e),
         }
     }
 
