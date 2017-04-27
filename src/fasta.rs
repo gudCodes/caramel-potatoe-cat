@@ -91,6 +91,69 @@ fn from_u8(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
     Ok(res)
 }
 
+fn from_str(ns: &str) -> Result<NucleicAcidSequence, &'static str> {
+    let len = ns.len();
+
+    let mut res: NucleicAcidSequence = NucleicAcidSequence::new();
+
+    res.resize(len, NucleicAcidCode::Gap);
+
+    for (i,c) in ns.char_indices() {
+        let mut arr = res.as_mut_slice();
+        match c.to_ascii_uppercase() {
+            'A' => { arr[i] = NucleicAcidCode::A },
+            'C' => { arr[i] = NucleicAcidCode::C },
+            'G' => { arr[i] = NucleicAcidCode::G },
+            'T' => { arr[i] = NucleicAcidCode::T },
+            'U' => { arr[i] = NucleicAcidCode::U },
+            'N' => { arr[i] = NucleicAcidCode::N },
+            'J' => { arr[i] = NucleicAcidCode::K },
+            'S' => { arr[i] = NucleicAcidCode::S },
+            'Y' => { arr[i] = NucleicAcidCode::Y },
+            'N' => { arr[i] = NucleicAcidCode::M },
+            'W' => { arr[i] = NucleicAcidCode::W },
+            'R' => { arr[i] = NucleicAcidCode::R },
+            'B' => { arr[i] = NucleicAcidCode::B },
+            'D' => { arr[i] = NucleicAcidCode::D },
+            'H' => { arr[i] = NucleicAcidCode::H },
+            'V' => { arr[i] = NucleicAcidCode::V },
+            '-' => { arr[i] = NucleicAcidCode::Gap },
+            _ => return Err("invalid nucleic acid code"),
+        }
+    }
+
+    Ok(res)
+}
+
+fn from_str_itt(ns: &str) -> Result<NucleicAcidSequence, &'static str> {
+    let mut res: NucleicAcidSequence = NucleicAcidSequence::with_capacity(ns.len());
+
+    for c in ns.chars() {
+        match c.to_ascii_uppercase() {
+            'A' => res.push(NucleicAcidCode::A),
+            'C' => res.push(NucleicAcidCode::C),
+            'G' => res.push(NucleicAcidCode::G),
+            'T' => res.push(NucleicAcidCode::T),
+            'U' => res.push(NucleicAcidCode::U),
+            'N' => res.push(NucleicAcidCode::N),
+            'J' => res.push(NucleicAcidCode::K),
+            'S' => res.push(NucleicAcidCode::S),
+            'Y' => res.push(NucleicAcidCode::Y),
+            'N' => res.push(NucleicAcidCode::M),
+            'W' => res.push(NucleicAcidCode::W),
+            'R' => res.push(NucleicAcidCode::R),
+            'B' => res.push(NucleicAcidCode::B),
+            'D' => res.push(NucleicAcidCode::D),
+            'H' => res.push(NucleicAcidCode::H),
+            'V' => res.push(NucleicAcidCode::V),
+            '-' => res.push(NucleicAcidCode::Gap),
+            _ => return Err("invalid nucleic acid code"),
+        }
+    }
+
+    Ok(res)
+}
+
 named!(description(&[u8]) -> &str,
     map_res!(preceded!(char!('>'), not_line_ending), str::from_utf8)
 );
@@ -131,6 +194,32 @@ mod tests {
     fn test_nucleic_acid_from_u8_case_insensitivity() {
         let data = &b"AcTg"[..];
         let res = from_u8(data);
+
+        assert_eq!(res, Ok(vec![
+            NucleicAcidCode::A,
+            NucleicAcidCode::C,
+            NucleicAcidCode::T,
+            NucleicAcidCode::G,
+        ]));
+    }
+
+    #[test]
+    fn test_nucleic_acid_from_str() {
+        let data = "ACTG";
+        let res = from_str(data);
+
+        assert_eq!(res, Ok(vec![
+            NucleicAcidCode::A,
+            NucleicAcidCode::C,
+            NucleicAcidCode::T,
+            NucleicAcidCode::G,
+        ]));
+    }
+
+    #[test]
+    fn test_nucleic_acid_from_str_itt() {
+        let data = "ACTG";
+        let res = from_str_itt(data);
 
         assert_eq!(res, Ok(vec![
             NucleicAcidCode::A,
@@ -183,6 +272,24 @@ mod tests {
 
         b.bytes = data.len() as u64;
         b.iter(|| from_u8(data));
+    }
+
+    #[bench]
+    fn bench_sequence_from_str(b: &mut test::Bencher) {
+        let data = include_bytes!("../data/test.sequence");
+        let data = str::from_utf8(data).unwrap();
+
+        b.bytes = data.len() as u64;
+        b.iter(|| from_str(data));
+    }
+
+    #[bench]
+    fn bench_sequence_from_str_itt(b: &mut test::Bencher) {
+        let data = include_bytes!("../data/test.sequence");
+        let data = str::from_utf8(data).unwrap();
+
+        b.bytes = data.len() as u64;
+        b.iter(|| from_str_itt(data));
     }
 
     #[bench]
