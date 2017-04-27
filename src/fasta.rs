@@ -1,3 +1,4 @@
+use std::ascii::AsciiExt;
 use std::str;
 
 use nom::not_line_ending;
@@ -65,7 +66,7 @@ fn from_u8(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
 
     for i in 0..len {
         let mut arr = res.as_mut_slice();
-        match ns[i] {
+        match ns[i].to_ascii_uppercase() {
             65 => { arr[i] = NucleicAcidCode::A },
             67 => { arr[i] = NucleicAcidCode::C },
             71 => { arr[i] = NucleicAcidCode::G },
@@ -116,6 +117,19 @@ mod tests {
     #[test]
     fn test_nucleic_acid_from_u8() {
         let data = &b"ACTG"[..];
+        let res = from_u8(data);
+
+        assert_eq!(res, Ok(vec![
+            NucleicAcidCode::A,
+            NucleicAcidCode::C,
+            NucleicAcidCode::T,
+            NucleicAcidCode::G,
+        ]));
+    }
+
+    #[test]
+    fn test_nucleic_acid_from_u8_case_insensitivity() {
+        let data = &b"AcTg"[..];
         let res = from_u8(data);
 
         assert_eq!(res, Ok(vec![
