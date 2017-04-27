@@ -56,7 +56,7 @@ pub enum AminoAcidCode {
 }
 
 impl NucleicAcidCode {
-    pub fn from_u8(n: u8) -> Result<Self, &'static str> {
+    pub fn from_u8(n: &u8) -> Result<Self, &'static str> {
         match n.to_ascii_uppercase() {
             65 => Ok(NucleicAcidCode::A),
             67 => Ok(NucleicAcidCode::C),
@@ -79,7 +79,7 @@ impl NucleicAcidCode {
         }
     }
 
-    pub fn from_char(n: char) -> Result<Self, &'static str> {
+    pub fn from_char(n: &char) -> Result<Self, &'static str> {
         match n.to_ascii_uppercase() {
             'A' => Ok(NucleicAcidCode::A),
             'C' => Ok(NucleicAcidCode::C),
@@ -114,7 +114,7 @@ fn from_u8(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
 
     for i in 0..len {
         let mut arr = res.as_mut_slice();
-        match NucleicAcidCode::from_u8(ns[i]) {
+        match NucleicAcidCode::from_u8(&ns[i]) {
             Ok(c) => arr[i] = c,
             Err(e) => return Err(e),
         }
@@ -132,7 +132,7 @@ fn from_str(ns: &str) -> Result<NucleicAcidSequence, &'static str> {
 
     for (i,c) in ns.char_indices() {
         let mut arr = res.as_mut_slice();
-        match NucleicAcidCode::from_char(c) {
+        match NucleicAcidCode::from_char(&c) {
             Ok(c) => arr[i] = c,
             Err(e) => return Err(e),
         }
@@ -145,7 +145,7 @@ fn from_str_itt(ns: &str) -> Result<NucleicAcidSequence, &'static str> {
     let mut res: NucleicAcidSequence = NucleicAcidSequence::with_capacity(ns.len());
 
     for c in ns.chars() {
-        match NucleicAcidCode::from_char(c) {
+        match NucleicAcidCode::from_char(&c) {
             Ok(c) => res.push(c),
             Err(e) => return Err(e),
         }
