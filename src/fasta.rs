@@ -217,6 +217,19 @@ mod tests {
     }
 
     #[test]
+    fn test_nucleic_acid_from_u8_itt() {
+        let data = &b"ACTG"[..];
+        let res = from_u8_itt(data);
+
+        assert_eq!(res, Ok(vec![
+            NucleicAcidCode::A,
+            NucleicAcidCode::C,
+            NucleicAcidCode::T,
+            NucleicAcidCode::G,
+        ]));
+    }
+
+    #[test]
     fn test_nucleic_acid_from_str() {
         let data = "ACTG";
         let res = from_str(data);
@@ -285,6 +298,14 @@ mod tests {
 
         b.bytes = data.len() as u64;
         b.iter(|| from_u8(data));
+    }
+
+    #[bench]
+    fn bench_sequence_from_u8_itt(b: &mut test::Bencher) {
+        let data = include_bytes!("../data/test.sequence");
+
+        b.bytes = data.len() as u64;
+        b.iter(|| from_u8_itt(data));
     }
 
     #[bench]
