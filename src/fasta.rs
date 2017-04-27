@@ -55,6 +55,31 @@ pub enum AminoAcidCode {
     Gap, // gap of indeterminate length
 }
 
+impl NucleicAcidCode {
+    pub fn from_u8(n: u8) -> Result<Self, &'static str> {
+        match n.to_ascii_uppercase() {
+            65 => Ok(NucleicAcidCode::A),
+            67 => Ok(NucleicAcidCode::C),
+            71 => Ok(NucleicAcidCode::G),
+            84 => Ok(NucleicAcidCode::T),
+            85 => Ok(NucleicAcidCode::U),
+            78 => Ok(NucleicAcidCode::N),
+            75 => Ok(NucleicAcidCode::K),
+            83 => Ok(NucleicAcidCode::S),
+            89 => Ok(NucleicAcidCode::Y),
+            77 => Ok(NucleicAcidCode::M),
+            87 => Ok(NucleicAcidCode::W),
+            82 => Ok(NucleicAcidCode::R),
+            66 => Ok(NucleicAcidCode::B),
+            68 => Ok(NucleicAcidCode::D),
+            72 => Ok(NucleicAcidCode::H),
+            86 => Ok(NucleicAcidCode::V),
+            45 => Ok(NucleicAcidCode::Gap),
+            _ => Err("invalid nucleic acid code"),
+        }
+    }
+}
+
 type NucleicAcidSequence = Vec<NucleicAcidCode>;
 
 fn from_u8(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
@@ -66,25 +91,9 @@ fn from_u8(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
 
     for i in 0..len {
         let mut arr = res.as_mut_slice();
-        match ns[i].to_ascii_uppercase() {
-            65 => { arr[i] = NucleicAcidCode::A },
-            67 => { arr[i] = NucleicAcidCode::C },
-            71 => { arr[i] = NucleicAcidCode::G },
-            84 => { arr[i] = NucleicAcidCode::T },
-            85 => { arr[i] = NucleicAcidCode::U },
-            78 => { arr[i] = NucleicAcidCode::N },
-            75 => { arr[i] = NucleicAcidCode::K },
-            83 => { arr[i] = NucleicAcidCode::S },
-            89 => { arr[i] = NucleicAcidCode::Y },
-            77 => { arr[i] = NucleicAcidCode::M },
-            87 => { arr[i] = NucleicAcidCode::W },
-            82 => { arr[i] = NucleicAcidCode::R },
-            66 => { arr[i] = NucleicAcidCode::B },
-            68 => { arr[i] = NucleicAcidCode::D },
-            72 => { arr[i] = NucleicAcidCode::H },
-            86 => { arr[i] = NucleicAcidCode::V },
-            45 => { arr[i] = NucleicAcidCode::Gap },
-            _ => return Err("invalid nucleic acid code"),
+        match NucleicAcidCode::from_u8(ns[i]) {
+            Ok(c) => arr[i] = c,
+            Err(e) => return Err(e),
         }
     }
 
