@@ -1,3 +1,5 @@
+use std::str;
+
 use nom::not_line_ending;
 
 
@@ -88,13 +90,15 @@ fn from_u8(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
     Ok(res)
 }
 
-named!(description,
-    preceded!(char!('>'), not_line_ending)
+named!(description(&[u8]) -> &str,
+    map_res!(preceded!(char!('>'), not_line_ending), str::from_utf8)
 );
 
 named!(nucleic_acid_sequence(&[u8]) -> NucleicAcidSequence,
     map_res!(not_line_ending, from_u8)
 );
+
+
 
 #[cfg(test)]
 mod tests {
@@ -129,7 +133,9 @@ mod tests {
         let data = &b">ERR001275.1198"[..];
         let res = description(data);
 
-        assert_eq!(res, Done(&b""[..], &data[1..]));
+        let expect = "ERR001275.1198";
+
+        assert_eq!(res, Done(&b""[..], expect));
     }
 
     #[test]
