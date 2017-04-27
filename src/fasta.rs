@@ -123,6 +123,19 @@ fn from_u8(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
     Ok(res)
 }
 
+fn from_u8_itt(ns: &[u8]) -> Result<NucleicAcidSequence, &'static str> {
+    let mut res: NucleicAcidSequence = NucleicAcidSequence::with_capacity(ns.len());
+
+    for n in ns.iter() {
+        match NucleicAcidCode::from_u8(n) {
+            Ok(c) => res.push(c),
+            Err(e) => return Err(e),
+        }
+    }
+
+    Ok(res)
+}
+
 fn from_str(ns: &str) -> Result<NucleicAcidSequence, &'static str> {
     let len = ns.len();
 
