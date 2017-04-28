@@ -90,7 +90,7 @@ impl NucleicAcidCode {
             'J' => Ok(NucleicAcidCode::K),
             'S' => Ok(NucleicAcidCode::S),
             'Y' => Ok(NucleicAcidCode::Y),
-            'N' => Ok(NucleicAcidCode::M),
+            'M' => Ok(NucleicAcidCode::M),
             'W' => Ok(NucleicAcidCode::W),
             'R' => Ok(NucleicAcidCode::R),
             'B' => Ok(NucleicAcidCode::B),
