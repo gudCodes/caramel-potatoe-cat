@@ -1,7 +1,7 @@
 use std::ascii::AsciiExt;
 use std::str;
 
-use nom::not_line_ending;
+use nom::{line_ending, not_line_ending};
 
 
 #[derive(Debug,PartialEq,Eq,Clone)]
@@ -175,7 +175,17 @@ named!(nucleic_acid_sequence(&[u8]) -> NucleicAcidSequence,
     map_res!(not_line_ending, from_u8)
 );
 
+named!(multiline_sequence(&[u8]) -> Vec<NucleicAcidSequence>,
+    separated_list!(line_ending, nucleic_acid_sequence)
+);
 
+named!(named_multiline_sequence(&[u8]) -> (&str, Vec<NucleicAcidSequence>),
+    separated_pair!(description, line_ending, multiline_sequence)
+);
+
+named!(fasta(&[u8]) -> Vec<(&str, Vec<NucleicAcidSequence>)>,
+    separated_list!(line_ending, named_multiline_sequence)
+);
 
 #[cfg(test)]
 mod tests {
@@ -279,6 +289,94 @@ mod tests {
             NucleicAcidCode::C,
             NucleicAcidCode::T,
             NucleicAcidCode::G,
+        ];
+
+        assert_eq!(res, Done(&b""[..], expect));
+    }
+
+    #[test]
+    fn test_parse_multiline_sequence() {
+        use nom::IResult::Done;
+
+        let data = &b"ACTG\nGTCA"[..];
+        let res = multiline_sequence(data);
+
+        let expect = vec![vec![
+            NucleicAcidCode::A,
+            NucleicAcidCode::C,
+            NucleicAcidCode::T,
+            NucleicAcidCode::G,
+        ], vec![
+            NucleicAcidCode::G,
+            NucleicAcidCode::T,
+            NucleicAcidCode::C,
+            NucleicAcidCode::A,
+        ]];
+
+        assert_eq!(res, Done(&b""[..], expect));
+    }
+
+    #[test]
+    fn test_parse_named_multiline_sequence() {
+        use nom::IResult::Done;
+
+        let data = &b">ERR001275.1198\nACTG\nGTCA"[..];
+        let res = named_multiline_sequence(data);
+
+        let expect = (
+            "ERR001275.1198",
+            vec![vec![
+                NucleicAcidCode::A,
+                NucleicAcidCode::C,
+                NucleicAcidCode::T,
+                NucleicAcidCode::G,
+            ], vec![
+                NucleicAcidCode::G,
+                NucleicAcidCode::T,
+                NucleicAcidCode::C,
+                NucleicAcidCode::A,
+            ]]
+        );
+
+        assert_eq!(res, Done(&b""[..], expect));
+    }
+
+    #[test]
+    fn test_parse_fasta() {
+        use nom::IResult::Done;
+
+        let data = &b">ERR001275.1198\nACTG\nGTCA\n>ERR001275.1198\nACTG\nGTCA"[..];
+        let res = fasta(data);
+
+        let expect = vec![
+            (
+                "ERR001275.1198",
+                vec![vec![
+                    NucleicAcidCode::A,
+                    NucleicAcidCode::C,
+                    NucleicAcidCode::T,
+                    NucleicAcidCode::G,
+                ], vec![
+                    NucleicAcidCode::G,
+                    NucleicAcidCode::T,
+                    NucleicAcidCode::C,
+                    NucleicAcidCode::A,
+                ]]
+            ),
+            (
+                "ERR001275.1198",
+                vec![vec![
+                    NucleicAcidCode::A,
+                    NucleicAcidCode::C,
+                    NucleicAcidCode::T,
+                    NucleicAcidCode::G,
+                ], vec![
+                    NucleicAcidCode::G,
+                    NucleicAcidCode::T,
+                    NucleicAcidCode::C,
+                    NucleicAcidCode::A,
+                ]]
+            )
         ];
 
         assert_eq!(res, Done(&b""[..], expect));
