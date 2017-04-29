@@ -431,4 +431,12 @@ mod tests {
         b.bytes = data.len() as u64;
         b.iter(|| nucleic_acid_sequence(data));
     }
+
+    #[bench]
+    fn bench_parse_fasta(b: &mut test::Bencher) {
+        let data = include_bytes!("../data/test.fasta");
+
+        b.bytes = data.len() as u64;
+        b.iter(|| fasta(data));
+    }
 }
